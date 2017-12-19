@@ -3,6 +3,7 @@ package search
 import (
 	"github.com/rtt/Go-Solr"
 	"fmt"
+	"reflect"
 )
 
 const solrHost = "10.98.16.215"
@@ -35,6 +36,11 @@ func Test_solr()  {
 		collection := results.Collection[i]
 		fmt.Println("id:", collection.Fields["id"])
 		fmt.Println("title:", collection.Fields["title"])
+		titleNorm := reflect.ValueOf(collection.Fields["title_norm"])
+		//index := []int{0}
+		fmt.Println("title_norm:", titleNorm.Index(0))
+		//titleNorm := collection.Fields["title_norm"]
+		//fmt.Println("title_norm", titleNorm)
 		fmt.Println("---------------------------------")
 	}
 }
