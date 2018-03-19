@@ -9,7 +9,7 @@ import (
 )
 
 func main() {
-	ip := "192.168.1.169"
+	ip := "192.168.1."
 	number := netutils.IpToNumber(ip)
 	logger.Info.Printf("Server %d pid=%d started with processes: %d", number, os.Getpid(),runtime.GOMAXPROCS(runtime.NumCPU()))
     newIp := netutils.NumberToIp(number)

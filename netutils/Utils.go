@@ -11,6 +11,9 @@ import (
 // this function will not throw error but return an Error value
 func IpToNumber(ip string) (result int) {
 	ipSegments := strings.Split(ip, ".")
+	if len(ipSegments) != 4 {
+		return -1
+	}
 	firstNumber, _ := strconv.Atoi(ipSegments[0])
 	firstNumber = firstNumber * int(math.Pow(256, 3))
 	secondNumber, _ := strconv.Atoi(ipSegments[1])
