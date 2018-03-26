@@ -3,6 +3,7 @@ package search
 import (
 	"github.com/rtt/Go-Solr"
 	"fmt"
+	"encoding/json"
 	//"reflect"
 )
 
@@ -10,12 +11,17 @@ const solrHost = "127.0.0.1"
 const port = 8983
 const core = "music"
 
+type Data struct {
+	Data []Music
+	Length int
+}
+
 type Music struct {
-	id int64
-	name string
-	singer []int64
-	searchWorld []string
-	url string
+	Id int64
+	Name string
+	Singer []int64
+	SearchWorld []string
+	Url string
 }
 
 func Test_solr()  {
@@ -40,6 +46,7 @@ func Test_solr()  {
 		panic(err)
 	}
 	results := res.Results
+	result := []Music{}
 	for i := 0; i < results.NumFound; i++ {
 		collection := results.Collection[i]
 		id := int64(collection.Fields["id"].(float64))
@@ -55,16 +62,22 @@ func Test_solr()  {
 		for i := range searchWordInterface {
 			searchWord[i] = searchWordInterface[i].(string)
 		}
-		fmt.Println(id, name, url, singer, searchWord)
-		music := Music{
-			id: id,
-			name: name,
-			url: url,
-			singer: singer,
-			searchWorld: searchWord,
+		musicObj := Music{
+			Id: id,
+			Name: name,
+			Url: url,
+			Singer: singer,
+			SearchWorld: searchWord,
 		}
-		fmt.Println(music)
-		//titleNorm := reflect.ValueOf(collection.Fields["title_norm"])
-		//fmt.Println("title_norm:", titleNorm.Index(0))
+		result = append(result, musicObj)
 	}
+	data := Data{
+		Data:result,
+		Length:len(result),
+	}
+	jsonData, jsonErr := json.Marshal(data)
+	if jsonErr != nil {
+		panic(jsonErr)
+	}
+	fmt.Println(string(jsonData))
 }
