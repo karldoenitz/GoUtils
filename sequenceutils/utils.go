@@ -42,8 +42,8 @@ func IsIn(obj interface{}, val interface{}) (isIn bool) {
 // DelFrom 通过索引从数组中删除元素
 //  - container: 容器型变量的引用，array、slice、map或者string类型
 //  - key: 待删除元素的索引
-func DelFrom(arr interface{}, key interface{}) {
-	vField := reflect.ValueOf(arr)
+func DelFrom(container interface{}, key interface{}) {
+	vField := reflect.ValueOf(container)
 	value := vField.Elem()
 	if value.Kind() == reflect.Slice || value.Kind() == reflect.Array {
 		index := key.(int)
@@ -52,16 +52,22 @@ func DelFrom(arr interface{}, key interface{}) {
 		}
 		result := reflect.AppendSlice(value.Slice(0, index), value.Slice(index+1, value.Len()))
 		value.Set(result)
+		return
 	}
 	if value.Kind() == reflect.Map {
-
+		for _, mapKey := range value.MapKeys() {
+			if mapKey.Interface() == key {
+				value.SetMapIndex(mapKey, reflect.Value{})
+			}
+		}
+		return
 	}
 	if value.Kind() == reflect.String {
 		index := key.(int)
 		if index < 0 || index+1 > value.Len() {
 			return
 		}
-		ps := arr.(*string)
+		ps := container.(*string)
 		result := (*ps)[:index] + (*ps)[index+1:]
 		value.SetString(result)
 		return
