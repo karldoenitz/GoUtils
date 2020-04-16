@@ -1,6 +1,9 @@
 package sequenceutils
 
-import "reflect"
+import (
+	"reflect"
+	"strings"
+)
 
 // IsIn 判断val是否在obj中，obj可以是map，array，struct；如果obj是map或struct，则val为key；如果obj是array，则val为元素。
 //  - obj: map、array或者struct类型的引用
@@ -8,7 +11,8 @@ import "reflect"
 func IsIn(obj interface{}, val interface{}) (isIn bool) {
 	pField := reflect.ValueOf(obj)
 	vField := pField.Elem()
-	if vField.Kind() == reflect.Array || vField.Kind() == reflect.Slice {
+	vKind := vField.Kind()
+	if vKind == reflect.Array || vKind == reflect.Slice {
 		for i := 0; i < vField.Len(); i++ {
 			if vField.Index(i).Interface() == val {
 				isIn = true
@@ -17,7 +21,7 @@ func IsIn(obj interface{}, val interface{}) (isIn bool) {
 		}
 		return
 	}
-	if vField.Kind() == reflect.Struct {
+	if vKind == reflect.Struct {
 		fieldName := val.(string)
 		if _, isIn = vField.Type().FieldByName(fieldName); isIn {
 			return
@@ -27,7 +31,7 @@ func IsIn(obj interface{}, val interface{}) (isIn bool) {
 		}
 		return
 	}
-	if vField.Kind() == reflect.Map {
+	if vKind == reflect.Map {
 		for _, v := range vField.MapKeys() {
 			if v.Interface() == val {
 				isIn = true
@@ -35,6 +39,9 @@ func IsIn(obj interface{}, val interface{}) (isIn bool) {
 			}
 		}
 		return
+	}
+	if vKind == reflect.String {
+		return strings.Contains(obj.(string), val.(string))
 	}
 	return
 }
@@ -116,4 +123,94 @@ func SliceSeq(seq interface{}, startIdx, endIdx int) (result interface{}) {
 		return
 	}
 	return
+}
+
+// Slice 有序变量切片函数，支持按步长进行切片，切片逆序，从末尾开始计算下下标等操作。
+//  - seq: 有序变量，string、array或slice类型
+//  - params: 切片操作参数，第一个值为首位置索引，第二个值为末位置索引，第三个值为步长。
+func Slice(seq interface{}, params ...int) (result interface{}) {
+	var startIdx, endIdx, step, length int
+	paramSize := len(params)
+	if paramSize == 0 {
+		return seq
+	}
+	vField := reflect.ValueOf(seq)
+	vKind := vField.Kind()
+	// 处理下标及步长
+	if vKind == reflect.Array || vKind == reflect.Slice || vKind == reflect.String {
+		length = vField.Len()
+		switch paramSize {
+		case 1:
+			startIdx = params[0]
+			endIdx = length
+			step = 1
+		case 2:
+			startIdx = params[0]
+			endIdx = params[1]
+			step = 1
+		default:
+			startIdx = params[0]
+			endIdx = params[1]
+			step = params[2]
+			if step == 0 {
+				return seq
+			}
+		}
+		if startIdx < 0 {
+			startIdx = length + startIdx
+		}
+		if endIdx < 0 {
+			endIdx = length + endIdx
+		}
+		if startIdx < 0 {
+			startIdx = 0
+		}
+		if endIdx > length {
+			endIdx = length
+		}
+	}
+	// 处理切片及数组
+	if vKind == reflect.Array || vKind == reflect.Slice {
+		// 原切片长度小于等于0，或者截取长度小于等于0，则直接返回空切片
+		tmpResult := reflect.New(reflect.TypeOf(seq)).Elem()
+		if length <= 0 || endIdx-startIdx <= 0 {
+			return tmpResult.Interface()
+		}
+		switch {
+		case step == 1:
+			tmpResult = vField.Slice(startIdx, endIdx)
+		case step < 0:
+			for i := endIdx - 1; i >= startIdx; i += step {
+				tmpResult = reflect.Append(tmpResult, vField.Index(i))
+			}
+		default:
+			for i := startIdx; i < endIdx; i += step {
+				tmpResult = reflect.Append(tmpResult, vField.Index(i))
+			}
+		}
+		return tmpResult.Interface()
+	}
+	// 处理字符串
+	if vKind == reflect.String {
+		var tmpResult string
+		if length <= 0 || endIdx-startIdx <= 0 {
+			return tmpResult
+		}
+		seqStr := seq.(string)
+		switch {
+		case step == 1:
+			tmpResult = seqStr[startIdx:endIdx]
+		case step < 0:
+			for i := endIdx - 1; i >= startIdx; i += step {
+				tmpResult += string(seqStr[i])
+			}
+		default:
+			for i := startIdx; i < endIdx; i += step {
+				tmpResult += string(seqStr[i])
+			}
+		}
+		result = tmpResult
+		return
+	}
+	return seq
 }
