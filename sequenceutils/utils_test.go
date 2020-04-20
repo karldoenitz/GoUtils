@@ -22,4 +22,5 @@ func TestIsIn(t *testing.T) {
 	// b[1:-2][::3]
 	rs = Slice(b, 1, -2, 3).(string)
 	t.Logf("%#v", rs)
+	ExampleIfElse()
 }

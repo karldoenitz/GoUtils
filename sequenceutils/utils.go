@@ -222,3 +222,14 @@ func Slice(seq interface{}, params ...int) (result interface{}) {
 	}
 	return seq
 }
+
+// IfElse 三元表达函数
+//  - condition: 条件
+//  - a: condition为true时返回此值
+//  - b: condition为false时返回此值
+func IfElse(condition bool, a interface{}, b interface{}) interface{} {
+	if condition {
+		return a
+	}
+	return b
+}

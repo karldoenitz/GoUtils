@@ -1,5 +1,7 @@
 package sequenceutils
 
+import "fmt"
+
 func ExampleIsIn() {
 	testArray := []int{1, 2, 3, 4, 5}
 	IsIn(&testArray, 3)   // true
@@ -32,4 +34,18 @@ func ExampleSlice() {
 	// 效果等同于Python的 testArray[:8][::3]
 	resultArray := Slice(testArray, 0, 8, 3).([]int)
 	println(resultArray) // [1, 4, 7]
+}
+
+func ExampleIfElse() {
+	a := map[string]interface{}{
+		"name": "zhangsan",
+		"id":   1,
+	}
+	b := map[string]interface{}{
+		"name": "wangwu",
+		"id":   2,
+	}
+	// c = a[id]>b[id]?a:b
+	c := IfElse(a["id"].(int) > b["id"].(int), a, b).(map[string]interface{})
+	fmt.Printf("%#v", c)
 }
