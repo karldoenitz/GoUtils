@@ -53,8 +53,12 @@ func DelFrom(container interface{}, key interface{}) {
 	pField := reflect.ValueOf(container)
 	vField := pField.Elem()
 	if vField.Kind() == reflect.Slice || vField.Kind() == reflect.Array {
+		length := vField.Len()
 		index := key.(int)
-		if index < 0 || index+1 > vField.Len() {
+		if index < 0 {
+			index += length
+		}
+		if index < 0 || index+1 > length {
 			return
 		}
 		result := reflect.AppendSlice(vField.Slice(0, index), vField.Slice(index+1, vField.Len()))
@@ -71,7 +75,11 @@ func DelFrom(container interface{}, key interface{}) {
 	}
 	if vField.Kind() == reflect.String {
 		index := key.(int)
-		if index < 0 || index+1 > vField.Len() {
+		length := vField.Len()
+		if index < 0 {
+			index += length
+		}
+		if index < 0 || index+1 > length {
 			return
 		}
 		ps := container.(*string)
