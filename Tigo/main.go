@@ -1,7 +1,7 @@
 package main
 
 import (
-    "github.com/karldoenitz/Tigo/TigoWeb"
+    TigoWeb "github.com/karldoenitz/Tigo/web"
     "net/http"
 )
 
